@@ -39,9 +39,9 @@ local function saveConfig()
         writefile(configFile, HttpService:JSONEncode(config))
     end)
     if success then
-        print("Config saved successfully!")
+        
     else
-        warn("Failed to save config:", errorMessage)
+        
     end
 end
 
@@ -52,9 +52,7 @@ local function loadConfig()
     end)
     if success then
         config = HttpService:JSONDecode(data)
-        print("Config loaded successfully!")
     else
-        print("No saved config found, using defaults.")
         saveConfig() -- Save default config if no file exists
     end
 end
@@ -194,7 +192,7 @@ local function activateUniversalHeal()
     
         end
     else
-        warn("Universal Heal or its abilityEvent is not available!")
+
     end
 end
 
@@ -207,7 +205,7 @@ local function activateGroundStomp()
 
         end
     else
-        warn("Ground Stomp or its spellEvent is not available!")
+
     end
 end
 
@@ -225,10 +223,10 @@ mainSection:addToggle("Enable Auto Skill", autoSkillEnabled, function(state)
     autoSkillEnabled = state
 
     if autoSkillEnabled then
-        print("Auto Skill Enabled")
+
         autoSkillThread = task.spawn(autoSkillLoop) -- Start the loop
     else
-        print("Auto Skill Disabled")
+
         if autoSkillThread then
             task.cancel(autoSkillThread) -- Stop the loop
         end
@@ -335,7 +333,6 @@ end)
 
 -- Start Auto Retry loop on startup if enabled
 if autoRetryEnabled then
-    print("Auto Retry was enabled on startup, starting loop...")
     task.spawn(autoRetryLoop)
 end
 
@@ -411,7 +408,7 @@ AntilagSection:addButton("Button", function()
             task.wait(0.1) -- Small delay to ensure the part is properly destroyed
             part = character:FindFirstChild(partName)
         end
-        print(partName .. " successfully destroyed")
+
     end
     
     -- Function to handle character setup
@@ -487,13 +484,12 @@ local configSection = configPage:addSection("Dont Touch Anything Here")
 
 configSection:addButton("Save Config", function()
     saveConfig()
-    print("Config saved manually.")
 end)
 
 configSection:addButton("Load Config", function()
     loadConfig()
     applyWalkSpeed()
-    print("Config loaded manually.")
+
 end)
 
 configSection:addToggle("Auto Load Config", config.autoLoadConfig, function(state)
@@ -547,7 +543,7 @@ toggleSquare.MouseButton1Click:Connect(function()
     if mainUI then
         mainUI.Enabled = not mainUI.Enabled -- Toggle visibility of the main UI
     else
-        warn("Main UI not found!")
+
     end
 end)
 
