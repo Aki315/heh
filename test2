@@ -1,5 +1,5 @@
 -- Load Venyx UI
-local Venyx = loadstring(game:HttpGet("https://raw.githubusercontent.com/Aki315/heh/refs/heads/main/ui%20library105"))()
+local Venyx = loadstring(game:HttpGet("https://raw.githubusercontent.com/Aki315/heh/refs/heads/main/ui%20library106"))()
 local ui = Venyx.new("Dungeon Quest Script", 5012544693) -- Change to your UI title and icon ID
 
 -- Services
