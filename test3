@@ -91,11 +91,18 @@ mainSection:addToggle("Enable Walk Speed", config.walkSpeedEnabled, function(sta
     applyWalkSpeed()
 end)
 
-mainSection:addSlider("Walk Speed", config.walkSpeed, 16, 100, function(value)
-    config.walkSpeed = value
-    saveConfig()
-    applyWalkSpeed()
+
+mainSection:addTextbox("Walk Speed", tostring(config.walkSpeed), function(value)
+    local newWalkSpeed = tonumber(value)
+    if newWalkSpeed and newWalkSpeed >= 16 and newWalkSpeed <= 100 then
+        config.walkSpeed = newWalkSpeed
+        saveConfig()
+        applyWalkSpeed()
+    else
+        warn("Invalid Walk Speed value. Please enter a number between 16 and 100.")
+    end
 end)
+
 
 -- Infinite Raid Logic
 local function startInfiniteRaid()
