@@ -1,4 +1,4 @@
-DungeonQuestScript-- venyx ui lib reuploaded by me
+-- venyx ui lib reuploaded by me
 -- init
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
@@ -113,7 +113,7 @@ utility:InitializeKeybind()
 -- Adding a Toggle button for the "Main" UI
 utility:Create("ImageButton", {
     Name = "ToggleButton",
-    Parent = game:GetService("CoreGui").DungeonQuestScript,
+    Parent = game:GetService("CoreGui"),
     BackgroundTransparency = 1,
     Position = UDim2.new(0.01, 0, 0.01, 0), -- Top-left corner
     Size = UDim2.new(0, 50, 0, 50), -- Small square button
@@ -361,7 +361,7 @@ utility:InitializeKeybind()
 -- Adding a Toggle button for the "Main" UI
 utility:Create("ImageButton", {
     Name = "ToggleButton",
-    Parent = game:GetService("CoreGui").DungeonQuestScript,
+    Parent = game:GetService("CoreGui"),
     BackgroundTransparency = 1,
     Position = UDim2.new(0.01, 0, 0.01, 0), -- Top-left corner
     Size = UDim2.new(0, 50, 0, 50), -- Small square button
