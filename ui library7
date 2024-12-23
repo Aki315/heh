@@ -1,4 +1,4 @@
--- venyx ui lib reuploaded by me
+DungeonQuestScript-- venyx ui lib reuploaded by me
 -- init
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
@@ -107,7 +107,29 @@ do
 	end
 	
 	function 
+
 utility:InitializeKeybind()
+
+-- Adding a Toggle button for the "Main" UI
+utility:Create("ImageButton", {
+    Name = "ToggleButton",
+    Parent = game:GetService("CoreGui").DungeonQuestScript,
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0.01, 0, 0.01, 0), -- Top-left corner
+    Size = UDim2.new(0, 50, 0, 50), -- Small square button
+    ZIndex = 6,
+    Image = "rbxassetid://5012539403", -- A placeholder icon
+    ImageColor3 = themes.TextColor,
+    ["MouseButton1Click"] = function()
+        -- Toggle visibility of the Main container
+        local main = container:FindFirstChild("Main")
+        if main then
+            main.Visible = not main.Visible
+        end
+    end
+})
+
+
 
 -- Adding a Minimize button
 utility:Create("ImageButton", {
@@ -333,7 +355,29 @@ utility:Create("ImageLabel", {
 		})
 		
 		
+
 utility:InitializeKeybind()
+
+-- Adding a Toggle button for the "Main" UI
+utility:Create("ImageButton", {
+    Name = "ToggleButton",
+    Parent = game:GetService("CoreGui").DungeonQuestScript,
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0.01, 0, 0.01, 0), -- Top-left corner
+    Size = UDim2.new(0, 50, 0, 50), -- Small square button
+    ZIndex = 6,
+    Image = "rbxassetid://5012539403", -- A placeholder icon
+    ImageColor3 = themes.TextColor,
+    ["MouseButton1Click"] = function()
+        -- Toggle visibility of the Main container
+        local main = container:FindFirstChild("Main")
+        if main then
+            main.Visible = not main.Visible
+        end
+    end
+})
+
+
 
 -- Adding a Minimize button
 utility:Create("ImageButton", {
