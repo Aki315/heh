@@ -202,32 +202,6 @@ end
 -- classes
 
 local library = {} -- main
-function library:toggleMinimize()
-    local container = self.container.Main
-    if container.Size == UDim2.new(0, 400, 0, 400) then
-        -- Minimized state
-        utility:Tween(container, {Size = UDim2.new(0, 100, 0, 40)}, 0.2)
-    else
-        -- Expanded state
-        utility:Tween(container, {Size = UDim2.new(0, 400, 0, 400)}, 0.2)
-    end
-end
-
--- Add Minimize Button
-utility:Create("TextButton", {
-    Name = "MinimizeButton",
-    Parent = library.container.Main, -- Ensure this points to the correct container
-    BackgroundTransparency = 1,
-    Position = UDim2.new(1, -50, 0, 10),
-    Size = UDim2.new(0, 40, 0, 20),
-    Text = "-",
-    TextColor3 = themes.TextColor,
-    Font = Enum.Font.Gotham,
-    TextSize = 14
-}).MouseButton1Click:Connect(function()
-    library:toggleMinimize()
-end)
-
 local page = {}
 local section = {}
 
@@ -2192,6 +2166,30 @@ do
 			frame.ScrollBarImageTransparency = 1
 		end
 	end
+end
+
+library.mainFrame = utility:Create("ImageLabel", {
+    Name = "Main",
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0.25, 0, 0.052435593, 0),
+    Size = UDim2.new(0, 400, 0, 400),
+    Image = "rbxassetid://4641149554", 
+    ImageColor3 = themes.Background,
+    ScaleType = Enum.ScaleType.Slice,
+    SliceCenter = Rect.new(4, 4, 296, 296)
+})
+
+library.minimized = false
+
+function library:ToggleMinimize()
+    self.minimized = not self.minimized
+    local size = self.minimized and UDim2.new(0, 400, 0, 30) or UDim2.new(0, 400, 0, 400)
+    utility:Tween(self.mainFrame, {Size = size}, 0.3)
+end
+
+function library:AddButton(name, callback)
+    -- Button creation logic would go here
+    -- This is just a stub - implement actual button creation as needed
 end
 
 return library
