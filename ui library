@@ -13,26 +13,6 @@ local tweeninfo = TweenInfo.new
 -- additional
 local utility = {}
 
--- Create toggle button
-local toggleButton = utility:Create("TextButton", {
-    Name = "ToggleButton",
-    Parent = library.container, -- Place the button in the same parent as your GUI
-    BackgroundColor3 = Color3.new(0.2, 0.2, 0.2),
-    Text = "Toggle GUI",
-    TextColor3 = Color3.new(1, 1, 1),
-    Font = Enum.Font.Gotham,
-    TextSize = 14,
-    Position = UDim2.new(0, 10, 0, 10), -- Adjust position as needed
-    Size = UDim2.new(0, 100, 0, 30) -- Adjust size as needed
-})
-
--- Bind toggle action
-local isVisible = true
-toggleButton.MouseButton1Click:Connect(function()
-    isVisible = not isVisible
-    library.container.Main.Visible = isVisible
-end)
-
 -- themes
 local objects = {}
 local themes = {
@@ -225,6 +205,64 @@ end
 local library = {} -- main
 local page = {}
 local section = {}
+-- GUI Container
+library.container = utility:Create("ScreenGui", {
+    Name = "MainUI",
+    Parent = game.CoreGui,
+    Enabled = true -- Main GUI is visible by default
+}, {
+    utility:Create("Frame", {
+        Name = "MainFrame",
+        BackgroundColor3 = themes.Background,
+        Size = UDim2.new(0, 600, 0, 400),
+        Position = UDim2.new(0.5, -300, 0.5, -200),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+    }, {
+        utility:Create("TextLabel", {
+            Name = "TitleLabel",
+            Text = "My UI Library",
+            Font = Enum.Font.GothamBold,
+            TextSize = 20,
+            TextColor3 = themes.TextColor,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 0, 50),
+            Position = UDim2.new(0, 0, 0, 0),
+        })
+    })
+})
+
+-- Create the toggle button
+local toggleButton = utility:Create("ImageButton", {
+    Name = "ToggleButton",
+    Parent = game.CoreGui, -- Parent of the toggle button
+    Size = UDim2.new(0, 50, 0, 50),
+    Position = UDim2.new(0, 10, 0, 10), -- Adjust position as needed
+    BackgroundColor3 = Color3.new(1, 0, 0), -- Red for visibility
+    BorderSizePixel = 0,
+    Text = "",
+})
+
+-- Toggle functionality
+local isVisible = true -- Tracks visibility of the main GUI
+
+toggleButton.MouseButton1Click:Connect(function()
+    isVisible = not isVisible
+    library.container.Enabled = isVisible -- Toggle the main GUI's visibility
+end)
+
+-- Helper function to create UI elements
+function utility:Create(instance, properties, children)
+    local object = Instance.new(instance)
+    for prop, value in pairs(properties or {}) do
+        object[prop] = value
+    end
+    for _, child in ipairs(children or {}) do
+        child.Parent = object
+    end
+    return object
+end
+
+return library
 
 do
 	library.__index = library
