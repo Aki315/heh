@@ -19,7 +19,8 @@ local config = {
     selectedTier = 1,
     RemoveVFXEnabled = false, -- Existing config
     AutobonusBossEnabled = false, -- Add this
-    AutoRetryEnabled = false 
+    AutoRetryEnabled = false, 
+    HideUIEnabled = false
 
 }
 
@@ -83,23 +84,57 @@ local configPage = ui:addPage("Config(Testing)", 5012544693)
 
 -- Main Page Section
 local mainSection = mainPage:addSection("Walk Speed Settings")
+
+-- Function to apply the configured walk speed to the player's character
+local function applyWalkSpeed()
+    local player = game.Players.LocalPlayer
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = config.walkSpeed
+    end
+end
+
+-- Listen for character respawn to reapply walk speed
+local function setupCharacterListener()
+    local player = game.Players.LocalPlayer
+    player.CharacterAdded:Connect(function(character)
+        character:WaitForChild("Humanoid") -- Wait for the humanoid to load
+        if config.walkSpeedEnabled then
+            applyWalkSpeed()
+        end
+    end)
+end
+
+-- Initialize character listener
+setupCharacterListener()
+
+-- Toggle for enabling/disabling walk speed
 mainSection:addToggle("Enable Walk Speed", config.walkSpeedEnabled, function(state)
     config.walkSpeedEnabled = state
     saveConfig()
-    applyWalkSpeed()
+    if state then
+        applyWalkSpeed()
+    end
 end)
 
-
+-- Textbox for setting walk speed
 mainSection:addTextbox("Walk Speed", tostring(config.walkSpeed), function(value)
     local newWalkSpeed = tonumber(value)
     if newWalkSpeed and newWalkSpeed >= 16 and newWalkSpeed <= 100 then
         config.walkSpeed = newWalkSpeed
         saveConfig()
-        applyWalkSpeed()
+        if config.walkSpeedEnabled then
+            applyWalkSpeed()
+        end
     else
         warn("Invalid Walk Speed value. Please enter a number between 16 and 100.")
     end
 end)
+
+-- Apply walk speed on script startup if enabled
+if config.walkSpeedEnabled then
+    applyWalkSpeed()
+end
+
 
 
 -- Infinite Raid Logic
@@ -479,6 +514,113 @@ if config.RemoveVFXEnabled then
     task.spawn(deletePartsAndModels)
 end
 
+-- Antilag Section for HideUI
+local AntilagSection = AntilagPage:addSection("Hide Name, Lvl, Pic")
+local hideUILoopEnabled = config.HideUIEnabled -- Initialize based on saved config
+
+-- Utility function to find a child at a given path
+local function findPath(parent, ...)
+    local current = parent
+    for _, name in ipairs({...}) do
+        if current and current:FindFirstChild(name) then
+            current = current[name]
+        else
+            return nil
+        end
+    end
+    return current
+end
+
+-- Function to find a character in the workspace
+local function findCharacter()
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj:IsA("Model") and obj:FindFirstChild("Head") and obj:FindFirstChild("Humanoid") then
+            return obj
+        end
+    end
+    return nil
+end
+
+-- Function to update PlayerName, Level, XP, and Portrait
+local function updatePlayerInfo()
+    local player = game:GetService("Players").LocalPlayer
+
+    -- Paths for PlayerName, Level.TextLabel, Portrait ImageLabel, and XP TextLabel
+    local playerNamePath = findPath(player.PlayerGui, "HUD", "Main", "PlayerStatus", "PlayerStatus", "PlayerName")
+    local levelPath = findPath(player.PlayerGui, "HUD", "Main", "PlayerStatus", "PlayerStatus", "Level", "TextLabel")
+    local portraitPath = findPath(player.PlayerGui, "HUD", "Main", "PlayerStatus", "PlayerStatus", "Portrait", "Frame", "ImageLabel")
+    local xpPath = findPath(player.PlayerGui, "HUD", "Main", "PlayerStatus", "PlayerStatus", "XP", "BarFrame", "TextLabel")
+
+    -- Change PlayerName text
+    if playerNamePath then
+        playerNamePath.Text = "Sezemi Hub"
+    end
+
+    -- Change Level text
+    if levelPath then
+        levelPath.Text = "inf"
+    end
+
+    -- Change Portrait Image to none
+    if portraitPath then
+        portraitPath.Image = "" -- Removes the image
+    end
+
+    -- Change XP text
+    if xpPath then
+        xpPath.Text = "inf/inf"
+    end
+end
+
+-- Function to update PlayerName and Level in the workspace character
+local function updateCharacterInfo()
+    local character = findCharacter()
+    if character then
+        local head = character:FindFirstChild("Head")
+        if head and head:FindFirstChild("playerNameplate") then
+            local playerNameplate = head.playerNameplate
+            if playerNameplate:FindFirstChild("PlayerName") then
+                playerNameplate.PlayerName.Text = "Sezemi Hub"
+            end
+            if playerNameplate:FindFirstChild("Level") then
+                playerNameplate.Level.Text = "inf"
+            end
+        end
+    end
+end
+
+-- Function to run the Hide UI logic in a loop
+local function hideUIElements()
+    while hideUILoopEnabled do
+        updatePlayerInfo()
+        updateCharacterInfo()
+        task.wait(1) -- Wait before repeating to reduce CPU usage
+    end
+end
+
+-- Toggle for HideUI in the Antilag Section
+AntilagSection:addToggle("Toggle", hideUILoopEnabled, function(value)
+    hideUILoopEnabled = value -- Update the loop status
+
+    -- Save the updated state to the configuration
+    config.HideUIEnabled = value
+    saveConfig()
+
+    if hideUILoopEnabled then
+        print("Hide UI Enabled")
+        task.spawn(hideUIElements) -- Start hiding UI in a separate thread
+    else
+        print("Hide UI Disabled")
+    end
+end)
+
+-- Automatically start the HideUI loop on startup if it was enabled
+if config.HideUIEnabled then
+    print("Hide UI was enabled on startup, starting loop...")
+    task.spawn(hideUIElements)
+end
+
+
 -- Config Page Section
 local configSection = configPage:addSection("Dont Touch Anything Here")
 
@@ -522,7 +664,7 @@ label.Name = "ToggleLabel"
 label.Size = UDim2.new(1, 0, 1, 0) -- Fit inside the button
 label.BackgroundTransparency = 1 -- Transparent background
 label.Font = Enum.Font.GothamBold
-label.Text = "T" -- Display the toggle character
+label.Text = "Hide/Open" -- Display the toggle character
 label.TextColor3 = Color3.fromRGB(0, 0, 0) -- Black text
 label.TextSize = 14
 label.Parent = toggleSquare -- Attach to the button
@@ -549,5 +691,3 @@ end)
 
 
 
-
- 
