@@ -6,8 +6,8 @@ local ui = Venyx.new("Dungeon Quest Script", 5012544693) -- Change to your UI ti
 local HttpService = game:GetService("HttpService")
 
 -- Directory and Config File
-local configDirectory = "Configs"
-local configFile = configDirectory .. "/walkSpeedConfig.txt"
+local configDirectory = "Sezemi Hub"
+local configFile = configDirectory .. "/Config.txt"
 
 -- Default Config
 local config = {
