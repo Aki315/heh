@@ -202,6 +202,32 @@ end
 -- classes
 
 local library = {} -- main
+function library:toggleMinimize()
+    local container = self.container.Main
+    if container.Size == UDim2.new(0, 400, 0, 400) then
+        -- Minimized state
+        utility:Tween(container, {Size = UDim2.new(0, 100, 0, 40)}, 0.2)
+    else
+        -- Expanded state
+        utility:Tween(container, {Size = UDim2.new(0, 400, 0, 400)}, 0.2)
+    end
+end
+
+-- Add Minimize Button
+utility:Create("TextButton", {
+    Name = "MinimizeButton",
+    Parent = library.container.Main, -- Ensure this points to the correct container
+    BackgroundTransparency = 1,
+    Position = UDim2.new(1, -50, 0, 10),
+    Size = UDim2.new(0, 40, 0, 20),
+    Text = "-",
+    TextColor3 = themes.TextColor,
+    Font = Enum.Font.Gotham,
+    TextSize = 14
+}).MouseButton1Click:Connect(function()
+    library:toggleMinimize()
+end)
+
 local page = {}
 local section = {}
 
@@ -2169,27 +2195,3 @@ do
 end
 
 return library
-function library:toggleMinimize()
-    local container = self.container.Main
-    if container.Size == UDim2.new(0, 400, 0, 400) then
-        -- Minimized state
-        utility:Tween(container, {Size = UDim2.new(0, 100, 0, 40)}, 0.2)
-    else
-        -- Expanded state
-        utility:Tween(container, {Size = UDim2.new(0, 400, 0, 400)}, 0.2)
-    end
-end
-
-utility:Create("TextButton", {
-    Name = "MinimizeButton",
-    Parent = container.Main,
-    BackgroundTransparency = 1,
-    Position = UDim2.new(1, -50, 0, 10), -- Adjust as needed
-    Size = UDim2.new(0, 40, 0, 20),
-    Text = "-",
-    TextColor3 = themes.TextColor,
-    Font = Enum.Font.Gotham,
-    TextSize = 14
-}).MouseButton1Click:Connect(function()
-    library:toggleMinimize()
-end)
