@@ -78,8 +78,8 @@ end
 
 -- Tabs and Pages
 local mainPage = ui:addPage("Main", 5012544693)
-local configPage = ui:addPage("Config", 5012544693)
 local AntilagPage = ui:addPage("Antilag", 5012544693)
+local configPage = ui:addPage("Config(Testing)", 5012544693)
 
 
 
@@ -339,26 +339,6 @@ if autoRetryEnabled then
     task.spawn(autoRetryLoop)
 end
 
-
--- Config Page Section
-local configSection = configPage:addSection("Configuration Management")
-
-configSection:addButton("Save Config", function()
-    saveConfig()
-    print("Config saved manually.")
-end)
-
-configSection:addButton("Load Config", function()
-    loadConfig()
-    applyWalkSpeed()
-    print("Config loaded manually.")
-end)
-
-configSection:addToggle("Auto Load Config", config.autoLoadConfig, function(state)
-    config.autoLoadConfig = state
-    saveConfig()
-end)
-
 -- Antilag Section for Boosting FPS
 local AntilagSection = AntilagPage:addSection("Antilag / Boost FPS")
 AntilagSection:addButton("Button", function()
@@ -501,6 +481,25 @@ if config.RemoveVFXEnabled then
     loopEnabled = true
     task.spawn(deletePartsAndModels)
 end
+
+-- Config Page Section
+local configSection = configPage:addSection("Dont Touch Anything Here")
+
+configSection:addButton("Save Config", function()
+    saveConfig()
+    print("Config saved manually.")
+end)
+
+configSection:addButton("Load Config", function()
+    loadConfig()
+    applyWalkSpeed()
+    print("Config loaded manually.")
+end)
+
+configSection:addToggle("Auto Load Config", config.autoLoadConfig, function(state)
+    config.autoLoadConfig = state
+    saveConfig()
+end)
 
 
 -- Select the default page on startup
