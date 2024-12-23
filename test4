@@ -507,6 +507,50 @@ end
 ui:SelectPage(ui.pages[1], true)
 
 
+-- Create a ScreenGui to hold the toggle button
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ToggleScreenGui"
+screenGui.Parent = game.CoreGui -- Add to CoreGui
+
+-- Create the ToggleSquare button
+local toggleSquare = Instance.new("ImageButton")
+toggleSquare.Name = "ToggleSquare"
+toggleSquare.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+toggleSquare.Size = UDim2.new(0, 80, 0, 80) -- Adjust size
+toggleSquare.Position = UDim2.new(0.00100000005, 0, 0.5, 0) -- Adjust position
+toggleSquare.Image = "" -- Optional: Add an image here if needed
+toggleSquare.Parent = screenGui -- Add the button to ScreenGui
+
+-- Add a label to the ToggleSquare
+local label = Instance.new("TextLabel")
+label.Name = "ToggleLabel"
+label.Size = UDim2.new(1, 0, 1, 0) -- Fit inside the button
+label.BackgroundTransparency = 1 -- Transparent background
+label.Font = Enum.Font.GothamBold
+label.Text = "T" -- Display the toggle character
+label.TextColor3 = Color3.fromRGB(0, 0, 0) -- Black text
+label.TextSize = 14
+label.Parent = toggleSquare -- Attach to the button
+
+-- Function to find the Main UI frame
+local function findMainUI()
+    for _, gui in ipairs(game.CoreGui:GetChildren()) do
+        if gui:IsA("ScreenGui") and gui.Name == "Dungeon Quest Script" then -- Update with your UI name
+            return gui
+        end
+    end
+    return nil
+end
+
+-- Toggle visibility of Main UI
+toggleSquare.MouseButton1Click:Connect(function()
+    local mainUI = findMainUI()
+    if mainUI then
+        mainUI.Enabled = not mainUI.Enabled -- Toggle visibility of the main UI
+    else
+        warn("Main UI not found!")
+    end
+end)
 
 
 
