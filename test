@@ -1,0 +1,507 @@
+-- Load Venyx UI
+local Venyx = loadstring(game:HttpGet("https://raw.githubusercontent.com/Aki315/heh/refs/heads/main/ui%20library104"))()
+local ui = Venyx.new("Dungeon Quest Script", 5012544693) -- Change to your UI title and icon ID
+
+-- Services
+local HttpService = game:GetService("HttpService")
+
+-- Directory and Config File
+local configDirectory = "Configs"
+local configFile = configDirectory .. "/walkSpeedConfig.txt"
+
+-- Default Config
+local config = {
+    walkSpeedEnabled = false,
+    walkSpeed = 16, -- Default Roblox character walk speed
+    autoLoadConfig = true, -- Toggle auto-load config
+    infiniteRaidEnabled = false,
+    selectedRaid = "Hela Raid",
+    selectedTier = 1,
+    RemoveVFXEnabled = false, -- Existing config
+    AutobonusBossEnabled = false, -- Add this
+    AutoRetryEnabled = false 
+
+}
+
+-- Ensure Directory and File Exists
+local function ensureConfigFile()
+    if not isfolder(configDirectory) then
+        makefolder(configDirectory)
+    end
+    if not isfile(configFile) then
+        writefile(configFile, HttpService:JSONEncode(config))
+    end
+end
+
+-- Save Config
+local function saveConfig()
+    local success, errorMessage = pcall(function()
+        writefile(configFile, HttpService:JSONEncode(config))
+    end)
+    if success then
+        print("Config saved successfully!")
+    else
+        warn("Failed to save config:", errorMessage)
+    end
+end
+
+-- Load Config
+local function loadConfig()
+    local success, data = pcall(function()
+        return readfile(configFile)
+    end)
+    if success then
+        config = HttpService:JSONDecode(data)
+        print("Config loaded successfully!")
+    else
+        print("No saved config found, using defaults.")
+        saveConfig() -- Save default config if no file exists
+    end
+end
+
+-- Apply Walk Speed
+local function applyWalkSpeed()
+    local player = game:GetService("Players").LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = config.walkSpeedEnabled and config.walkSpeed or 16
+    end
+end
+
+-- Ensure Config File Exists on Start
+ensureConfigFile()
+
+-- Load Config at Start if Auto-Load is Enabled
+if config.autoLoadConfig then
+    loadConfig()
+    applyWalkSpeed()
+end
+
+-- Tabs and Pages
+local mainPage = ui:addPage("Main", 5012544693)
+local configPage = ui:addPage("Config", 5012544693)
+local AntilagPage = ui:addPage("Antilag", 5012544693)
+
+
+
+-- Main Page Section
+local mainSection = mainPage:addSection("Walk Speed Settings")
+mainSection:addToggle("Enable Walk Speed", config.walkSpeedEnabled, function(state)
+    config.walkSpeedEnabled = state
+    saveConfig()
+    applyWalkSpeed()
+end)
+
+mainSection:addSlider("Walk Speed", config.walkSpeed, 16, 100, function(value)
+    config.walkSpeed = value
+    saveConfig()
+    applyWalkSpeed()
+end)
+
+-- Infinite Raid Logic
+local function startInfiniteRaid()
+    local args = {
+        [1] = {
+            [1] = {
+                [1] = "\1",
+                [2] = {
+                    ["\3"] = "PlaySolo",
+                    ["partyData"] = {
+                        ["difficulty"] = "Nightmare",
+                        ["mode"] = "Normal",
+                        ["dungeonName"] = config.selectedRaid,
+                        ["tier"] = config.selectedTier
+                    }
+                }
+            },
+            [2] = "c"
+        }
+    }
+
+    -- Trigger Raid Start
+    game:GetService("ReplicatedStorage"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+    game:GetService("ReplicatedStorage").remotes.changeStartValue:FireServer()
+end
+
+local raidLoopThread
+
+-- Function to Start the Infinite Raid Loop
+local function startRaidLoop()
+    raidLoopThread = game:GetService("RunService").Heartbeat:Connect(function()
+        if config.infiniteRaidEnabled then
+            startInfiniteRaid()
+            wait(5) -- Wait before triggering the raid again (adjust as needed)
+        else
+            raidLoopThread:Disconnect() -- Stop the loop when toggled off
+        end
+    end)
+end
+
+-- Main Page - Infinite Raid Settings
+mainSection:addToggle("Infinite Raid", config.infiniteRaidEnabled, function(value)
+    config.infiniteRaidEnabled = value
+    saveConfig()
+
+    -- If enabled, start the raid loop
+    if value then
+        print("Infinite Raid Enabled")
+        startRaidLoop()  -- Start the raid loop when toggled on
+    else
+        print("Infinite Raid Disabled")
+        if raidLoopThread then
+            raidLoopThread:Disconnect() -- Stop the loop when toggled off
+        end
+    end
+end)
+
+mainSection:addDropdown("Raids", {"Hela Raid", "Goliath Raid"}, function(selection)
+    config.selectedRaid = selection
+    saveConfig()
+    print("Selected Raid:", selection)
+end)
+
+mainSection:addDropdown("Tier", {1, 2, 3, 4, 5}, function(selection)
+    config.selectedTier = selection
+    saveConfig()
+    print("Selected Tier:", selection)
+end)
+
+-- Automatically start the raid loop if the Infinite Raid toggle is enabled
+if config.infiniteRaidEnabled then
+    print("Infinite Raid was enabled on startup, starting loop...")
+    startRaidLoop()
+end
+
+-- Abyssal Void Farm Section
+local mainSection = mainPage:addSection("Abyssal Void Farm")
+
+-- Variables to control the loop
+local autoSkillEnabled = false
+local autoSkillThread
+
+-- Universal Heal Function
+local function activateUniversalHeal()
+    local universalHeal = game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Universal Heal")
+    if universalHeal and universalHeal:FindFirstChild("abilityEvent") then
+        for i = 1, 50 do
+            universalHeal.abilityEvent:FireServer() -- Fire the event 50 times
+    
+        end
+    else
+        warn("Universal Heal or its abilityEvent is not available!")
+    end
+end
+
+-- Ground Stomp Function
+local function activateGroundStomp()
+    local groundStomp = game:GetService("Players").LocalPlayer.Backpack:FindFirstChild("Ground Stomp")
+    if groundStomp and groundStomp:FindFirstChild("spellEvent") then
+        for i = 1, 50 do
+            groundStomp.spellEvent:FireServer() -- Fire the event 50 times
+
+        end
+    else
+        warn("Ground Stomp or its spellEvent is not available!")
+    end
+end
+
+-- Function to manage the loop
+local function autoSkillLoop()
+    while autoSkillEnabled do
+        activateUniversalHeal()
+        activateGroundStomp()
+        task.wait(1) -- Interval between each activation cycle
+    end
+end
+
+-- Toggle to enable/disable the loop
+mainSection:addToggle("Enable Auto Skill", autoSkillEnabled, function(state)
+    autoSkillEnabled = state
+
+    if autoSkillEnabled then
+        print("Auto Skill Enabled")
+        autoSkillThread = task.spawn(autoSkillLoop) -- Start the loop
+    else
+        print("Auto Skill Disabled")
+        if autoSkillThread then
+            task.cancel(autoSkillThread) -- Stop the loop
+        end
+    end
+end)
+      -- Auto bonusBoss Section (Modified for loop and config saving)
+local autoBonusBossEnabled = config.AutobonusBossEnabled  -- Use saved config
+
+-- Function to activate Auto bonusBoss
+local function activateAutoBonusBoss()
+    local args = {
+            [1] = {
+                [1] = {
+                    ["\3"] = "vote",
+                    ["vote"] = "bonus"
+                },
+                [2] = "/"
+            }
+        }
+        game:GetService("ReplicatedStorage"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+end
+
+-- Loop function for Auto bonusBoss
+local function autoBonusBossLoop()
+    while autoBonusBossEnabled do
+        activateAutoBonusBoss()
+        task.wait(5) -- Adjust the interval as needed (e.g., retry every 5 seconds)
+        if not autoBonusBossEnabled then
+            return -- Stop the loop when autoBonusBossEnabled is false
+        end
+    end
+end
+
+
+-- Toggle for Auto bonusBoss in UI
+mainSection:addToggle("Auto bonusBoss", autoBonusBossEnabled, function(value)
+    autoBonusBossEnabled = value  -- Set autoBonusBossEnabled to true or false based on toggle
+
+    -- Save the config when toggled
+    config.AutobonusBossEnabled = value
+    saveConfig()
+
+    if autoBonusBossEnabled then
+        print("Auto bonusBoss Enabled")
+        task.spawn(autoBonusBossLoop) -- Start the loop
+    else
+        print("Auto bonusBoss Disabled")
+        -- Optionally stop the loop here if needed (though it will automatically stop when the toggle is off)
+    end
+end)
+
+-- Start Auto bonusBoss loop on startup if enabled
+if autoBonusBossEnabled then
+    print("Auto bonusBoss was enabled on startup, starting loop...")
+    task.spawn(autoBonusBossLoop)
+end
+       -- Auto Retry Section (Similar to Auto bonusBoss)
+local autoRetryEnabled = config.AutoRetryEnabled  -- Use saved config for Auto Retry
+
+-- Function to trigger Auto Retry
+local function activateAutoRetry()
+    local args = {
+        [1] = {
+            [1] = {
+                ["\3"] = "vote",
+                ["vote"] = true
+            },
+            [2] = "/"
+        }
+    }
+    game:GetService("ReplicatedStorage"):WaitForChild("dataRemoteEvent"):FireServer(unpack(args))
+end
+
+-- Loop function for Auto Retry
+local function autoRetryLoop()
+    while autoRetryEnabled do
+        activateAutoRetry()
+        task.wait(5) -- Adjust the interval as needed (e.g., retry every 5 seconds)
+        if not autoRetryEnabled then
+            return -- Stop the loop when autoRetryEnabled is false
+        end
+    end
+end
+
+
+-- Toggle for Auto Retry in UI
+mainSection:addToggle("Auto Retry", autoRetryEnabled, function(value)
+    autoRetryEnabled = value  -- Set autoRetryEnabled to true or false based on toggle
+
+    -- Save the config when toggled
+    config.AutoRetryEnabled = value
+    saveConfig()
+
+    if autoRetryEnabled then
+        print("Auto Retry Enabled")
+        task.spawn(autoRetryLoop) -- Start the loop for retry
+    else
+        print("Auto Retry Disabled")
+        -- When the toggle is off, stop the loop by calling a condition in the loop
+        -- The loop will exit once `autoRetryEnabled` is false
+    end
+end)
+
+
+-- Start Auto Retry loop on startup if enabled
+if autoRetryEnabled then
+    print("Auto Retry was enabled on startup, starting loop...")
+    task.spawn(autoRetryLoop)
+end
+
+
+-- Config Page Section
+local configSection = configPage:addSection("Configuration Management")
+
+configSection:addButton("Save Config", function()
+    saveConfig()
+    print("Config saved manually.")
+end)
+
+configSection:addButton("Load Config", function()
+    loadConfig()
+    applyWalkSpeed()
+    print("Config loaded manually.")
+end)
+
+configSection:addToggle("Auto Load Config", config.autoLoadConfig, function(state)
+    config.autoLoadConfig = state
+    saveConfig()
+end)
+
+-- Antilag Section for Boosting FPS
+local AntilagSection = AntilagPage:addSection("Antilag / Boost FPS")
+AntilagSection:addButton("Button", function()
+    local Terrain = workspace:FindFirstChildOfClass('Terrain')
+    local Lighting = game:GetService("Lighting")
+    local RunService = game:GetService("RunService")
+
+    -- Set Terrain water properties
+    if Terrain then
+        Terrain.WaterWaveSize = 0
+        Terrain.WaterWaveSpeed = 0
+        Terrain.WaterReflectance = 0
+        Terrain.WaterTransparency = 0
+    end
+
+    -- Disable global lighting effects
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 9e9
+    settings().Rendering.QualityLevel = 1
+
+    -- Adjust materials, reflectance, and other properties of in-game objects
+    for i, v in pairs(game:GetDescendants()) do
+        if v:IsA("Part") or v:IsA("UnionOperation") or v:IsA("MeshPart") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
+            v.Material = Enum.Material.Plastic
+            v.Reflectance = 0
+        elseif v:IsA("Decal") then
+            v.Transparency = 1
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+            v.Lifetime = NumberRange.new(0)
+        elseif v:IsA("Explosion") then
+            v.BlastPressure = 1
+            v.BlastRadius = 1
+        end
+    end
+
+    -- Disable post-processing effects in Lighting
+    for i, v in pairs(Lighting:GetDescendants()) do
+        if v:IsA("BlurEffect") or v:IsA("SunRaysEffect") or v:IsA("ColorCorrectionEffect") or v:IsA("BloomEffect") or v:IsA("DepthOfFieldEffect") then
+            v.Enabled = false
+        end
+    end
+
+    -- Listen for new objects being added to the workspace and clean up certain effects
+    workspace.DescendantAdded:Connect(function(child)
+        task.spawn(function()
+            if child:IsA('ForceField') then
+                RunService.Heartbeat:Wait()
+                child:Destroy()
+            elseif child:IsA('Sparkles') then
+                RunService.Heartbeat:Wait()
+                child:Destroy()
+            elseif child:IsA('Smoke') or child:IsA('Fire') then
+                RunService.Heartbeat:Wait()
+                child:Destroy()
+            end
+        end)
+    end)
+end)
+
+-- Antilag Section for Removing Hands
+local AntilagSection = AntilagPage:addSection("Remove Hands")
+AntilagSection:addButton("Button", function()
+    local player = game.Players.LocalPlayer
+
+    -- Function to ensure a part is destroyed
+    local function ensureDestroyed(character, partName)
+        local part = character:FindFirstChild(partName)
+        while part do
+            part:Destroy()
+            task.wait(0.1) -- Small delay to ensure the part is properly destroyed
+            part = character:FindFirstChild(partName)
+        end
+        print(partName .. " successfully destroyed")
+    end
+    
+    -- Function to handle character setup
+    local function onCharacterAdded(character)
+        -- Wait for the character to fully load
+        character:WaitForChild("LeftHand")
+        character:WaitForChild("RightHand")
+    
+        -- Ensure LeftHand and RightHand are destroyed
+        ensureDestroyed(character, "LeftHand")
+        ensureDestroyed(character, "RightHand")
+    end
+    
+    -- Connect to the CharacterAdded event
+    player.CharacterAdded:Connect(onCharacterAdded)
+    
+    -- Handle the current character if it already exists
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+end)
+
+-- Antilag Section for Remove VFX
+local AntilagSection = AntilagPage:addSection("Remove VFX")
+local loopEnabled = config.RemoveVFXEnabled  -- Initialize based on saved config
+
+local function deletePartsAndModels()
+    local targetParts = {"Mighty Leap Slam Circle", "groundAura"}
+    local targetModelClass = "Universal Heal"
+    
+    while loopEnabled do
+        -- Delete up to 350 parts and models
+        for i = 1, 350 do
+            -- Delete parts
+            for _, targetName in ipairs(targetParts) do
+                local part = workspace:FindFirstChild(targetName)
+                if part then
+                    part:Destroy()
+                end
+            end
+
+            -- Delete Universal Heal models
+            local model = workspace:FindFirstChild(targetModelClass)
+            if model and model:IsA("Model") then
+                model:Destroy()
+            end
+        end
+
+        task.wait() -- Allow other processes to run and prevent high CPU usage
+    end
+end
+
+AntilagSection:addToggle("Toggle", loopEnabled, function(value)
+    loopEnabled = value  -- Set loopEnabled to true or false based on toggle
+
+    -- Save the config when toggled
+    config.RemoveVFXEnabled = value
+    saveConfig()
+
+    if loopEnabled then
+        task.spawn(deletePartsAndModels) -- Start removing VFX if enabled
+    end
+end)
+
+-- Start VFX removal on startup if enabled
+if config.RemoveVFXEnabled then
+    loopEnabled = true
+    task.spawn(deletePartsAndModels)
+end
+
+
+-- Select the default page on startup
+ui:SelectPage(ui.pages[1], true)
+
+
+
+
+
+
+ 
