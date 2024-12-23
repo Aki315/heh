@@ -106,7 +106,49 @@ do
 		return clone
 	end
 	
-	function utility:InitializeKeybind()
+	function 
+
+utility:InitializeKeybind()
+
+-- Adding a Toggle button for the "Main" UI
+utility:Create("ImageButton", {
+    Name = "ToggleButton",
+    Parent = game:GetService("CoreGui"),
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0.01, 0, 0.01, 0), -- Top-left corner
+    Size = UDim2.new(0, 50, 0, 50), -- Small square button
+    ZIndex = 6,
+    Image = "rbxassetid://5012539403", -- A placeholder icon
+    ImageColor3 = themes.TextColor,
+    ["MouseButton1Click"] = function()
+        -- Toggle visibility of the Main container
+        local main = container:FindFirstChild("Main")
+        if main then
+            main.Visible = not main.Visible
+        end
+    end
+})
+
+
+
+-- Adding a Minimize button
+utility:Create("ImageButton", {
+    Name = "MinimizeButton",
+    Parent = container.Main.TopBar,
+    BackgroundTransparency = 1,
+    Position = UDim2.new(1, -30, 0, 10),
+    Size = UDim2.new(0, 20, 0, 20),
+    ZIndex = 6,
+    Image = "rbxassetid://5012538583",
+    ImageColor3 = themes.TextColor,
+    ["MouseButton1Click"] = function()
+        -- Minimize the Main container
+        utility:Tween(container.Main, {
+            Size = UDim2.new(0, 600, 0, 0)
+        }, 0.2)
+    end
+})
+
 		self.keybinds = {}
 		self.ended = {}
 		
@@ -217,8 +259,17 @@ do
 			Name = title,
 			Parent = game.CoreGui
 		}, {
-			utility:Create("ImageLabel", {
-				Name = "Main",
+			
+utility:Create("ImageLabel", {
+    Name = "Main",
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0.25, 0, 0.052435593, 0),
+    Size = UDim2.new(0, 600, 0, 600), -- Updated size
+    Image = "rbxassetid://4641149554",
+    ImageColor3 = themes.Background,
+    ScaleType = Enum.ScaleType.Slice,
+    SliceCenter = Rect.new(4, 4, 296, 296)
+})
 				BackgroundTransparency = 1,
 				Position = UDim2.new(0.25, 0, 0.052435593, 0),
 				Size = UDim2.new(0, 511, 0, 428),
@@ -265,8 +316,18 @@ do
 						})
 					})
 				}),
-				utility:Create("ImageLabel", {
-					Name = "TopBar",
+				
+utility:Create("ImageLabel", {
+    Name = "TopBar",
+    BackgroundTransparency = 1,
+    ClipsDescendants = true,
+    Size = UDim2.new(1, 0, 0, 50), -- Updated size
+    ZIndex = 5,
+    Image = "rbxassetid://4595286933",
+    ImageColor3 = themes.Accent,
+    ScaleType = Enum.ScaleType.Slice,
+    SliceCenter = Rect.new(4, 4, 296, 296)
+})
 					BackgroundTransparency = 1,
 					ClipsDescendants = true,
 					Size = UDim2.new(1, 0, 0, 38),
@@ -293,7 +354,49 @@ do
 			})
 		})
 		
-		utility:InitializeKeybind()
+		
+
+utility:InitializeKeybind()
+
+-- Adding a Toggle button for the "Main" UI
+utility:Create("ImageButton", {
+    Name = "ToggleButton",
+    Parent = game:GetService("CoreGui"),
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0.01, 0, 0.01, 0), -- Top-left corner
+    Size = UDim2.new(0, 50, 0, 50), -- Small square button
+    ZIndex = 6,
+    Image = "rbxassetid://5012539403", -- A placeholder icon
+    ImageColor3 = themes.TextColor,
+    ["MouseButton1Click"] = function()
+        -- Toggle visibility of the Main container
+        local main = container:FindFirstChild("Main")
+        if main then
+            main.Visible = not main.Visible
+        end
+    end
+})
+
+
+
+-- Adding a Minimize button
+utility:Create("ImageButton", {
+    Name = "MinimizeButton",
+    Parent = container.Main.TopBar,
+    BackgroundTransparency = 1,
+    Position = UDim2.new(1, -30, 0, 10),
+    Size = UDim2.new(0, 20, 0, 20),
+    ZIndex = 6,
+    Image = "rbxassetid://5012538583",
+    ImageColor3 = themes.TextColor,
+    ["MouseButton1Click"] = function()
+        -- Minimize the Main container
+        utility:Tween(container.Main, {
+            Size = UDim2.new(0, 600, 0, 0)
+        }, 0.2)
+    end
+})
+
 		utility:DraggingEnabled(container.Main.TopBar, container.Main)
 		
 		return setmetatable({
